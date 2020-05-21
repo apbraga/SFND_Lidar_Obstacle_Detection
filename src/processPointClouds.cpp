@@ -43,7 +43,20 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 {
   // TODO: Create two new point clouds, one cloud with obstacles and other with segmented plane
 
-    std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult(cloud, cloud);
+    typename pcl::PointCloud<PointT>::Ptr obstacle (new pcl::PointCloud<PointT> ());
+    typename pcl::PointCloud<PointT>::Ptr road (new pcl::PointCloud<PointT> ());
+    //add road points to road point cloud
+    for(int idx : inliers->indices){
+        road->points.push_back(cloud->points[idx]);
+    }
+    //extract road points from lidar reading, isolation object
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud (cloud);
+    extract.setIndices (inliers);
+    extract.setNegative (true);
+    extract.filter (*obstacle);
+
+    std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult(obstacle, road);
     return segResult;
 }
 
@@ -53,8 +66,29 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 {
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
-	pcl::PointIndices::Ptr inliers;
-    // TODO:: Fill in this function to find inliers for the cloud.
+	//pcl::PointIndices::Ptr inliers;
+    // DONE:: Fill in this function to find inliers for the cloud.
+    //based on http://pointclouds.org/documentation/tutorials/planar_segmentation.html#planar-segmentation
+    
+    //initialize pointers for segmentation result
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    //setup the segmentation object using RANSAC ans its parameters
+    pcl::SACSegmentation<PointT> seg;
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (maxIterations);
+    seg.setDistanceThreshold (distanceThreshold);
+    //Get planes and inliers from segmentation
+    seg.setInputCloud (cloud);
+    seg.segment (*inliers, *coefficients);
+    //sanity check to confirm if plane was found
+    //inliers are points fitted to the plane
+    if(inliers->indices.size() == 0){
+        PCL_ERROR("Could not estimate a planar model for the given dataset.");
+        //return -1;
+    }
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
