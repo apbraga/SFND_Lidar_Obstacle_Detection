@@ -6,6 +6,7 @@
 #include <chrono>
 #include <string>
 #include "kdtree.h"
+#include <vector>
 
 // Arguments:
 // window is the region to draw box around
@@ -75,12 +76,36 @@ void render2DTree(Node* node, pcl::visualization::PCLVisualizer::Ptr& viewer, Bo
 
 }
 
+void proximity(std::vector<bool>& processed, int index, std::vector<int>& cluster, float& distanceTol, KdTree* tree, const std::vector<std::vector<float>>& points){
+	processed[index] = true;
+	cluster.push_back(index);
+	std::vector<int> close_points = tree->search(points[index], distanceTol);
+	while(close_points.size()>0){
+		index = close_points.back();
+		close_points.pop_back();
+		if(!processed[index]){
+			proximity(processed, index, cluster, distanceTol, tree, points);
+		}
+	}
+}
+
 std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
 {
 
 	// TODO: Fill out this function to return list of indices for each cluster
 
 	std::vector<std::vector<int>> clusters;
+	std::vector<bool> processed(points.size(), false);
+	
+	for(int idx= 0; idx < points.size(); idx++){
+		
+		if(!processed[idx]){
+			std::vector<int> cluster;
+			proximity(processed, idx, cluster, distanceTol, tree , points);
+			clusters.push_back(cluster);
+		}
+
+	}
  
 	return clusters;
 

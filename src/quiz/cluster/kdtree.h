@@ -35,7 +35,7 @@ struct KdTree
 
 	}
 
-	void insertHelper(Node** node, std::vector<float> point, int id, int depth){
+	void insertHelper(Node** node, std::vector<float> point, int id, uint depth){
 		
 		//Check if current node is available to the inserted
 		if(*node == NULL){
@@ -53,7 +53,7 @@ struct KdTree
 			}//move to right
 			else{
 				//continue traversing the tree passing the right node as reference recursively
-				insertHelper(&((*node)->left),point,id,depth+1);
+				insertHelper(&((*node)->right),point,id,depth+1);
 			}
 		}
 	}
@@ -64,29 +64,29 @@ struct KdTree
 		
 		std::vector<int> ids;
 
-		searchHelper(&root, target, &ids, 0, distanceTol);
+		searchHelper(root, target, ids, 0, distanceTol);
 				
 		return ids;
 	}
 	
-	void searchHelper(Node** node, std::vector<float>& target, std::vector<int>* ids, int depth, float& distanceTol){
+	void searchHelper(Node* node, std::vector<float> target, std::vector<int>& ids, int depth, float distanceTol){
 		
-		if(*node != NULL){
+		if(node != NULL){
 			//check if point is within the box
-			float distances[] = {target[0]-(*node)->point[0],target[1]-(*node)->point[1] };
+			float distances[] = {target[0]-node->point[0],target[1]-node->point[1] };
 			float distance = sqrt(distances[0]*distances[0] + distances[1]*distances[1]);
 			//if it is within the box, then add to output list
 			if(distance <= distanceTol){
-				ids->push_back((*node)->id);
+				ids.push_back(node->id);
 			}
 
 			// explore right and left leaves is distance is within boundaries
 			uint cd = depth % 2;
-			if(distances[cd] <= distanceTol){
-				searchHelper(&((*node)->left),target, ids, depth+1,distanceTol);
+			if(distances[cd] < distanceTol){
+				searchHelper(node->left,target, ids, depth+1,distanceTol);
 			}
-			if(distances[cd] >= -distanceTol){
-				searchHelper(&((*node)->right),target, ids, depth+1,distanceTol);
+			if(distances[cd] > -distanceTol){
+				searchHelper(node->right, target, ids, depth+1,distanceTol);
 			}
 		}
 		

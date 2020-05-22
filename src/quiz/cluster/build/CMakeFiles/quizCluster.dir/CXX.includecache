@@ -17,6 +17,8 @@ string
 -
 kdtree.h
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/quiz/cluster/kdtree.h
+vector
+-
 
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/quiz/cluster/kdtree.h
 ../../render/render.h
