@@ -28,12 +28,45 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     auto startTime = std::chrono::steady_clock::now();
 
     // TODO:: Fill in the function to do voxel grid point reduction and region based filtering
+    typename pcl::PointCloud<PointT>::Ptr voxel_result (new pcl::PointCloud<PointT>);
+    //Voxel Filter
+    pcl::VoxelGrid<PointT> sor;
+    sor.setInputCloud(cloud);
+    sor.setLeafSize(filterRes,filterRes,filterRes);
+    sor.filter(*voxel_result);
+
+    //Region of Interest
+    typename pcl::PointCloud<PointT>::Ptr crop_result (new pcl::PointCloud<PointT>);
+    pcl::CropBox<PointT> crop(true);
+    crop.setInputCloud(voxel_result);
+    crop.setMin(minPoint);
+    crop.setMax(maxPoint);
+    crop.filter(*crop_result);
+
+    //Remove roof points
+    std::vector<int> indices;
+    pcl::CropBox<PointT> roof(true);
+    roof.setMin(Eigen::Vector4f (-1.5, -1.7, -1, 1));
+    roof.setMax(Eigen::Vector4f (2.6, 1.7, -.4, 1));
+    roof.setInputCloud(crop_result);
+    roof.filter(indices);
+
+    pcl::PointIndices::Ptr inliers {new pcl::PointIndices};
+    for(int point : indices){
+        inliers->indices.push_back(point);
+    }
+
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud(crop_result);
+    extract.setIndices(inliers);
+    extract.setNegative(true);
+    extract.filter(*crop_result);
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     std::cout << "filtering took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-    return cloud;
+    return crop_result;
 
 }
 
@@ -169,7 +202,6 @@ BoxQ ProcessPointClouds<PointT>::BoundingBoxQ(typename pcl::PointCloud<PointT>::
     pcl::compute3DCentroid(*cluster, pcaCentroid);
     Eigen::Matrix3f covariance;
     computeCovarianceMatrixNormalized(*cluster, pcaCentroid, covariance);
-
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
     Eigen::Matrix3f eigenVectorsPCA = eigen_solver.eigenvectors();
     eigenVectorsPCA.col(2) = eigenVectorsPCA.col(0).cross(eigenVectorsPCA.col(1));  /// This line is necessary for proper orientation in some cases. The numbers come out the same without it, but
@@ -186,7 +218,7 @@ BoxQ ProcessPointClouds<PointT>::BoundingBoxQ(typename pcl::PointCloud<PointT>::
 
    // Transform the original cloud to the origin where the principal components correspond to the axes.
     Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
-    projectionTransform.blomakck<3,3>(0,0) = eigenVectorsPCA.transpose();
+    projectionTransform.block<3,3>(0,0) = eigenVectorsPCA.transpose();
     projectionTransform.block<3,1>(0,3) = -1.f * (projectionTransform.block<3,3>(0,0) * pcaCentroid.head<3>());
     typename pcl::PointCloud<PointT>::Ptr cloudPointsProjected (new pcl::PointCloud<PointT>);
     pcl::transformPointCloud(*cluster, *cloudPointsProjected, projectionTransform);
