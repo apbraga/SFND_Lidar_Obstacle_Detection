@@ -20,6 +20,7 @@
 #include <unordered_set>
 #include "render/box.h"
 #include "kdtree.h"
+#include "ransac3d.h"
 #include <random>
 
 
@@ -52,9 +53,9 @@ public:
 
     std::vector<boost::filesystem::path> streamPcd(std::string dataPath);
 
-    void proximity(std::unordered_set<int>& processed, int index, std::vector<int>& cluster, float& distanceTol, KdTree& tree, typename pcl::PointCloud<PointT>::Ptr cloud);
+    void proximity(std::unordered_set<int>& processed, int index, std::vector<int>& cluster, float& distanceTol, KdTree*& tree, typename pcl::PointCloud<PointT>::Ptr cloud);
     
-    std::vector<std::vector<int>> euclideanCluster(typename pcl::PointCloud<PointT>::Ptr& cloud, KdTree& tree, float& distanceTol);
+    std::vector<std::vector<int>> euclideanCluster(typename pcl::PointCloud<PointT>::Ptr& cloud, KdTree*& tree, float& distanceTol);
 
 };
 #endif /* PROCESSPOINTCLOUDS_H_ */

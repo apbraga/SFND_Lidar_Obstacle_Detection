@@ -20,11 +20,11 @@ void ProcessPointClouds<PointT>::numPoints(typename pcl::PointCloud<PointT>::Ptr
 }
 
 template<typename PointT>
-void ProcessPointClouds<PointT>::proximity(std::unordered_set<int>& processed, int index, std::vector<int>& cluster, float& distanceTol, KdTree& tree, typename pcl::PointCloud<PointT>::Ptr cloud){
+void ProcessPointClouds<PointT>::proximity(std::unordered_set<int>& processed, int index, std::vector<int>& cluster, float& distanceTol, KdTree*& tree, typename pcl::PointCloud<PointT>::Ptr cloud){
 	processed.insert(index);
 	cluster.push_back(index);
     std::vector<float> point {cloud->points[index].x, cloud->points[index].y , cloud->points[index].z};
-	std::vector<int> close_points = tree.search(point, distanceTol);
+	std::vector<int> close_points = tree->search(point, distanceTol);
 	while(close_points.size()>0){
 		index = close_points.back();
 		close_points.pop_back();
@@ -36,7 +36,7 @@ void ProcessPointClouds<PointT>::proximity(std::unordered_set<int>& processed, i
 
 
 template<typename PointT>
-std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(typename pcl::PointCloud<PointT>::Ptr& cloud, KdTree& tree, float& distanceTol)
+std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(typename pcl::PointCloud<PointT>::Ptr& cloud, KdTree*& tree, float& distanceTol)
 {
 
 	std::vector<std::vector<int>> clusters;
@@ -44,7 +44,7 @@ std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(typen
 
 	for(int i = 0; i < cloud->points.size(); i++){
 		
-		if(processed.find(i) == processed.end()){
+		if(processed.count(i)== 0 ){
 			std::vector<int> cluster;
 			proximity(processed, i, cluster, distanceTol, tree , cloud);
 			clusters.push_back(cluster);
@@ -177,69 +177,9 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
     //based on http://pointclouds.org/documentation/tutorials/planar_segmentation.html#planar-segmentation
     
     std::unordered_set<int> inliersResult;
-	srand(time(NULL));
-	// TODO: Fill in this function
-	// For max iterations 
-	for(int i = 0; i < maxIterations; i++){
-	// Randomly sample subset and fit line
-		std::unordered_set<int> inliers;
-		while(inliers.size()<3){
-            inliers.insert(rand()%(cloud->points.size()));
-		}
-		//get coordinates from random points
-		float x1,x2,x3,y1,y2,y3,z1,z2,z3;
-		auto idx = inliers.begin();
-		x1 = cloud->points[*idx].x;
-		y1 = cloud->points[*idx].y;
-		z1 = cloud->points[*idx].z;
-		idx++;
-		x2 = cloud->points[*idx].x;
-		y2 = cloud->points[*idx].y;
-		z2 = cloud->points[*idx].z;
-		idx++;
-		x3 = cloud->points[*idx].x;
-		y3 = cloud->points[*idx].y;
-		z3 = cloud->points[*idx].z;
-		//calculate line components
-		float v1[] = {x2-x1,y2-y1,z2-z1}; // Point1 -> Point2
-		float v2[] = {x3-x1,y3-y1,z3-z1}; // Point1 -> Point3
-		float normal[] = {v1[1]*v2[2]-v1[2]*v2[1], v1[2]*v2[0]-v1[0]*v2[2],v1[0]*v2[1]-v1[1]*v2[0]}; // cross product of v1 x v2
-		
-		float a = normal[0];
-		float b = normal[1];
-		float c = normal[2];
-        float d = -(a*x1+b*y1+c*z1);
-	// Measure distance between every point and fitted line
-		for(int j = 0; j < cloud->points.size() ; j++){
-			
-			//skip if the cloud point is the inlier point
-			if(inliers.count(j) > 0){
-				continue;
-			}
-			
-			PointT point = cloud->points[j];
-			float x = point.x;
-			float y = point.y;
-			float z = point.z;
-
-			float distance = fabs(a*x+b*y+c*z+d)/sqrt(a*a+b*b+c*c);
-			// If distance is smaller than threshold count it as inlier
-			if(distance <= distanceThreshold){
-				inliers.insert(j);
-			}
-
-			if(inliers.size() > inliersResult.size()){
-				inliersResult = inliers;
-			}
-
-		}
-
-	}
-    if(inliersResult.size() == 0){
-        PCL_ERROR("Could not estimate a planar model for the given dataset.");
-        //return -1;
-    }
-
+    
+    Ransac3D<PointT>(cloud, maxIterations, distanceThreshold, inliersResult);
+	
     typename pcl::PointCloud<PointT>::Ptr  cloudInliers(new pcl::PointCloud<PointT>());
 	typename pcl::PointCloud<PointT>::Ptr cloudOutliers(new pcl::PointCloud<PointT>());
 	for(int index = 0; index < cloud->points.size(); index++)
@@ -254,7 +194,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
     std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult = {cloudOutliers, cloudInliers};
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-    std::cout << "plane segmentation took " << elapsedTime.count() << " milliseconds" << std::endl;
+    std::cout << "Cloud separation took " << elapsedTime.count() << " milliseconds" << std::endl;
 
     
     return segResult;
@@ -315,10 +255,10 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
     // http://pointclouds.org/documentation/tutorials/cluster_extraction.php
 
     //add cloud points to KDtree
-    KdTree tree = KdTree();
+    KdTree* tree = new KdTree();
     for(int i = 0 ; i < (cloud->points).size(); i++){
         std::vector<float> point {cloud->points[i].x, cloud->points[i].y , cloud->points[i].z};
-        tree.insert(point,i);
+        tree->insert(point,i);
     }
     // get clusters
     std::vector<std::vector<int>> clusters_indices = euclideanCluster(cloud, tree, clusterTolerance);
@@ -330,6 +270,9 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
             for(auto point_indx : cluster){
                 clusterCloud->points.push_back(cloud->points[point_indx]);
             }
+            clusterCloud->width = clusterCloud->points.size();
+            clusterCloud->height = 1;
+            clusterCloud->is_dense = true;
             clusters.push_back(clusterCloud);
         }
     }

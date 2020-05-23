@@ -5,6 +5,7 @@ CMakeFiles/environment.dir/src/environment.cpp.o: ../src/environment.cpp
 CMakeFiles/environment.dir/src/environment.cpp.o: ../src/kdtree.h
 CMakeFiles/environment.dir/src/environment.cpp.o: ../src/processPointClouds.cpp
 CMakeFiles/environment.dir/src/environment.cpp.o: ../src/processPointClouds.h
+CMakeFiles/environment.dir/src/environment.cpp.o: ../src/ransac3d.h
 CMakeFiles/environment.dir/src/environment.cpp.o: ../src/render/box.h
 CMakeFiles/environment.dir/src/environment.cpp.o: ../src/render/render.h
 CMakeFiles/environment.dir/src/environment.cpp.o: ../src/sensors/lidar.h
@@ -530,6 +531,7 @@ CMakeFiles/environment.dir/src/environment.cpp.o: /usr/include/vtk-6.3/vtkWin32H
 CMakeFiles/environment.dir/src/processPointClouds.cpp.o: ../src/kdtree.h
 CMakeFiles/environment.dir/src/processPointClouds.cpp.o: ../src/processPointClouds.cpp
 CMakeFiles/environment.dir/src/processPointClouds.cpp.o: ../src/processPointClouds.h
+CMakeFiles/environment.dir/src/processPointClouds.cpp.o: ../src/ransac3d.h
 CMakeFiles/environment.dir/src/processPointClouds.cpp.o: ../src/render/box.h
 CMakeFiles/environment.dir/src/processPointClouds.cpp.o: /usr/include/eigen3/Eigen/Cholesky
 CMakeFiles/environment.dir/src/processPointClouds.cpp.o: /usr/include/eigen3/Eigen/Core

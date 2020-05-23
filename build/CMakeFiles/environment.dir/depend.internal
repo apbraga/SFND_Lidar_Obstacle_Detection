@@ -6,6 +6,7 @@ CMakeFiles/environment.dir/src/environment.cpp.o
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/kdtree.h
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/processPointClouds.cpp
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/processPointClouds.h
+ /home/apbraga/SFND_Lidar_Obstacle_Detection/src/ransac3d.h
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/render/box.h
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/render/render.h
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/sensors/lidar.h
@@ -531,6 +532,7 @@ CMakeFiles/environment.dir/src/processPointClouds.cpp.o
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/kdtree.h
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/processPointClouds.cpp
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/processPointClouds.h
+ /home/apbraga/SFND_Lidar_Obstacle_Detection/src/ransac3d.h
  /home/apbraga/SFND_Lidar_Obstacle_Detection/src/render/box.h
  /usr/include/eigen3/Eigen/Cholesky
  /usr/include/eigen3/Eigen/Core
