@@ -20,6 +20,7 @@
 #include <unordered_set>
 #include "render/box.h"
 #include "kdtree.h"
+#include <random>
 
 
 template<typename PointT>

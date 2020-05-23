@@ -57,6 +57,8 @@ render/box.h
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/render/box.h
 kdtree.h
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/kdtree.h
+random
+-
 
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/render/box.h
 Eigen/Geometry
