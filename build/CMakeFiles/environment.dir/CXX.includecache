@@ -16,6 +16,10 @@ processPointClouds.h
 processPointClouds.cpp
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/processPointClouds.cpp
 
+/home/apbraga/SFND_Lidar_Obstacle_Detection/src/kdtree.h
+vector
+-
+
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/processPointClouds.cpp
 processPointClouds.h
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/processPointClouds.h
@@ -30,8 +34,6 @@ pcl/filters/extract_indices.h
 pcl/filters/voxel_grid.h
 -
 pcl/filters/crop_box.h
--
-pcl/kdtree/kdtree.h
 -
 pcl/segmentation/sac_segmentation.h
 -
@@ -49,8 +51,12 @@ ctime
 -
 chrono
 -
+unordered_set
+-
 render/box.h
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/render/box.h
+kdtree.h
+/home/apbraga/SFND_Lidar_Obstacle_Detection/src/kdtree.h
 
 /home/apbraga/SFND_Lidar_Obstacle_Detection/src/render/box.h
 Eigen/Geometry

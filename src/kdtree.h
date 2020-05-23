@@ -1,9 +1,12 @@
-/* \author Aaron Brown */
-// Quiz on implementing kd tree
+//#include "quiz/cluster/kdtree.h"
+//#include "quiz/cluster/cluster.cpp"
+//#include "quiz/ransac/ransac2d.cpp"
 
-#include "../../render/render.h"
+#ifndef KDTREE_H_
+#define KDTREE_H_
+
 #include <vector>
-
+//#include "../../render/render.h"
 
 // Structure to represent node of kd tree
 struct Node
@@ -94,3 +97,4 @@ struct KdTree
 	}
 
 };
+#endif /* KDTREE_H_ */
